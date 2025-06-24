@@ -434,3 +434,171 @@
 ---
 
 *Uporabite te ukaze in konstrukte kot izhodišče za reševanje PROG2 izpitnih nalog v Javi.*
+# Java GUI (Swing/AWT) in OOP za izpit PROG2
+
+Spodaj so zbrani ključni `import` stavki, vizualni in animacijski primeri ter osnovni OOP konstrukti, ki jih potrebujete za reševanje nalog 3 in 4 (GUI + animacije + OOP).
+
+---
+
+## 1. Uvozi za Swing/AWT GUI in animacije
+
+```java
+import javax.swing.JFrame;             // glavno okno aplikacije
+import javax.swing.JPanel;             // vsebnik za risanje in komponente
+import javax.swing.Timer;              // časovnik za animacijo (awt)
+import java.awt.Graphics;              // osnovni grafični kontekst
+import java.awt.Graphics2D;            // napredne grafične operacije
+import java.awt.Color;                 // delo z barvami
+import java.awt.Dimension;             // nastavljanje dimenzij komponent
+import java.awt.event.ActionListener;  // poslušalec za Timer ali gumbe
+import java.awt.event.ActionEvent;     // dogodek za ActionListener
+import java.awt.event.KeyAdapter;      // prilagodljiv poslušalec tipk
+import java.awt.event.KeyEvent;        // dogodek za tipkovnico
+import java.awt.event.MouseAdapter;    // prilagodljiv poslušalec miške
+import java.awt.event.MouseEvent;      // dogodek miške (klik)
+```
+
+---
+
+## 2. Osnovna struktura animacijskega panela (Bouncing Ball)
+
+```java
+public class BouncingBallPanel extends JPanel {
+    private int x = 50, y = 50;               // položaj žoge
+    private int dx = 2, dy = 3;               // premik v osi x in y
+    private final int RADIUS = 10;
+
+    public BouncingBallPanel() {
+        setPreferredSize(new Dimension(400, 300));
+        setBackground(Color.WHITE);
+        // Timer za animacijo: klic  repaint() vsako 10 ms
+        new Timer(10, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                move();                         // premakni žogo
+                repaint();                     // osveži risbo
+            }
+        }).start();
+
+        // Prisluhni tipkam za nadzor
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                // npr. spremeni hitrost s puščicami
+                if (e.getKeyCode() == KeyEvent.VK_UP) dy--;
+                if (e.getKeyCode() == KeyEvent.VK_DOWN) dy++;
+            }
+        });
+        setFocusable(true);
+    }
+
+    private void move() {
+        x += dx; y += dy;
+        // odbij od sten
+        if (x < RADIUS || x > getWidth() - RADIUS) dx = -dx;
+        if (y < RADIUS || y > getHeight() - RADIUS) dy = -dy;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(Color.RED);
+        g2.fillOval(x - RADIUS, y - RADIUS, 2 * RADIUS, 2 * RADIUS);
+    }
+}
+
+public class BouncingBallApp {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Bouncing Ball");
+        BouncingBallPanel panel = new BouncingBallPanel();
+        frame.add(panel);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        panel.requestFocusInWindow();          // da KeyListener deluje
+    }
+}
+```
+
+*Opis:* uporabljamo `Timer` za periodično premikanje in `repaint()`. Žoga se odbija ob stene s spremembo smeri (`dx = -dx`).
+
+---
+
+## 3. Dodajanje gumba na panel
+
+```java
+// znotraj konstruktorja BouncingBallPanel ali v glavni aplikaciji
+JButton pauseBtn = new JButton("Pause");        // gumb za pavzo/ustavitev animacije
+pauseBtn.addActionListener(e -> {
+    // zaustavi ali zaženi Timer
+});
+add(pauseBtn);                                   // dodaj gumb na JPanel (uporabno BoxLayout ali FlowLayout)
+```
+
+---
+
+## 4. OOP v Javi: razredi, dedovanje, vmesniki
+
+* **public class**: dostopen iz vseh paketov. Ena public class na datoteko (\*.java) z imenom datoteke.
+* **package-private** (brez modifierja): dostopen znotraj istega paketa.
+* **private**: dostopen samo znotraj razreda.
+* **protected**: dostopen v istem paketu in v podrazredih.
+
+### Dedovanje (Inheritance)
+
+```java
+public class Animal {                 // osnovni razred
+    public void eat() { System.out.println("Je"); }
+}
+
+public class Dog extends Animal {     // Dog deduje Animal
+    public void bark() { System.out.println("Hau!"); }
+}
+```
+
+* **extends**: vzpostavi dedovanje, podrazred pridobi metode in polja nadrazreda.
+* Če želite preglasiti metodo nadrazreda, uporabite **@Override**:
+
+```java
+@Override
+public void eat() { System.out.println("Pes je!"); }
+```
+
+### Vmesniki (Interfaces)
+
+```java
+public interface Movable {
+    void move();                    // abstraktna metoda
+}
+
+public class Car implements Movable { // implementira Movable
+    public void move() { System.out.println("Avto se premika"); }
+}
+```
+
+* **implements**: razred mora definirati vse metode vmesnika.
+* Lahko implementirate več vmesnikov: `class C implements I1, I2`.
+
+### Abstraktni razredi (Abstract Classes)
+
+```java
+public abstract class Shape {
+    protected Color color;
+    public Shape(Color c) { this.color = c; }
+    public abstract double area();    // abstraktna metoda brez telesa
+}
+
+public class Circle extends Shape {
+    private double r;
+    public Circle(Color c, double r) { super(c); this.r = r; }
+    @Override
+    public double area() { return Math.PI * r * r; }
+}
+```
+
+* **abstract class**: lahko vsebuje tako implementirane kot abstraktne metode.
+* Podrazredi morajo implementirati vse abstraktne metode ali biti sami abstraktni.
+
+---
+
+*Uporabite te primere in razlage za reševanje GUI in OOP delov izpitnih nalog.*
+
